@@ -57,6 +57,7 @@ export default class TableBlock {
     this.api = api;
     this.readOnly = readOnly;
     this.config = config;
+    this.data = data;
     this.data = {
       withHeadings: this.getConfig('withHeadings', false),
       content: data && data.content ? data.content : []
