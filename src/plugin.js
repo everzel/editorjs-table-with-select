@@ -229,32 +229,56 @@ export default class TableBlock {
    * @param {PasteEvent} event - event with pasted data
    */
   onPaste(event) {
-    const table = event.detail.data;
 
-    /** Check if the first row is a header */
-    const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
+    document.addEventListener('paste', (event) => {
+      window.clipText = event.clipboardData.getData('Text');
+      let html = '<table>';
 
-    /** Get all rows from the table */
-    const rows = Array.from(table.querySelectorAll('tr'));
+      clipText.split('\n').forEach(function (line) {
+        if(line){
+          html += '<tr>';
+          html += line.split('\t').map(function(l){
+            return '<td>' + l + '</td>';
+          }).join('');
+          html += '</tr>';
+        }
+      });
+      html += '</table>';
 
-    /** Generate a content matrix */
-    const content = rows.map((row) => {
-      /** Get cells from row */
-      const cells = Array.from(row.querySelectorAll('th, td'))
+      const table = this.stringToHtml(html).firstChild;
 
-      /** Return cells content */
-      return cells.map((cell) => cell.innerHTML);
+      /** Check if the first row is a header */
+      const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
+
+      /** Get all rows from the table */
+      const rows = Array.from(table.querySelectorAll('tr'));
+
+      /** Generate a content matrix */
+      const content = rows.map((row) => {
+        /** Get cells from row */
+        const cells = Array.from(row.querySelectorAll('th, td'))
+
+        /** Return cells content */
+        return cells.map((cell) => cell.innerHTML);
+      });
+
+      /** Update Tool's data */
+      this.data = {
+        withHeadings: firstRowHeading !== null,
+        content
+      };
+
+      /** Update table block */
+      if (this.table.wrapper) {
+        this.table.wrapper.replaceWith(this.render());
+      }
     });
-
-    /** Update Tool's data */
-    this.data = {
-      withHeadings: firstRowHeading !== null,
-      content
-    };
-
-    /** Update table block */
-    if (this.table.wrapper) {
-      this.table.wrapper.replaceWith(this.render());
-    }
   }
+
+  stringToHtml(str) {
+    let dom = document.createElement('div');
+    dom.innerHTML = str;
+
+    return dom;
+  };
 }
