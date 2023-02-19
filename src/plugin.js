@@ -96,6 +96,10 @@ export default class TableBlock {
    * @returns {HTMLDivElement}
    */
   render() {
+    document.addEventListener('paste', (event) => {
+      window.clipText = event.clipboardData.getData('Text');
+    });
+
     /** creating table */
     this.table = new Table(this.readOnly, this.api, this.data, this.config);
 
@@ -182,7 +186,7 @@ export default class TableBlock {
 
     // Clear other buttons
     Array.from(buttons).forEach((button) =>
-      button.classList.remove(this.api.styles.settingsButtonActive)
+        button.classList.remove(this.api.styles.settingsButtonActive)
     );
 
     // Mark active button
@@ -229,50 +233,50 @@ export default class TableBlock {
    * @param {PasteEvent} event - event with pasted data
    */
   onPaste(event) {
+    setTimeout(() => {
+      if (window.hasOwnProperty('clipText')) {
+        let html = '<table>';
 
-    document.addEventListener('paste', (event) => {
-      window.clipText = event.clipboardData.getData('Text');
-      let html = '<table>';
+        window.clipText.split('\n').forEach(function (line) {
+          if(line){
+            html += '<tr>';
+            html += line.split('\t').map(function(l){
+              return '<td>' + l + '</td>';
+            }).join('');
+            html += '</tr>';
+          }
+        });
+        html += '</table>';
 
-      clipText.split('\n').forEach(function (line) {
-        if(line){
-          html += '<tr>';
-          html += line.split('\t').map(function(l){
-            return '<td>' + l + '</td>';
-          }).join('');
-          html += '</tr>';
+        const table = this.stringToHtml(html).firstChild;
+
+        /** Check if the first row is a header */
+        const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
+
+        /** Get all rows from the table */
+        const rows = Array.from(table.querySelectorAll('tr'));
+
+        /** Generate a content matrix */
+        const content = rows.map((row) => {
+          /** Get cells from row */
+          const cells = Array.from(row.querySelectorAll('th, td'))
+
+          /** Return cells content */
+          return cells.map((cell) => cell.innerHTML);
+        });
+
+        /** Update Tool's data */
+        this.data = {
+          withHeadings: firstRowHeading !== null,
+          content
+        };
+
+        /** Update table block */
+        if (this.table.wrapper) {
+          this.table.wrapper.replaceWith(this.render());
         }
-      });
-      html += '</table>';
-
-      const table = this.stringToHtml(html).firstChild;
-
-      /** Check if the first row is a header */
-      const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
-
-      /** Get all rows from the table */
-      const rows = Array.from(table.querySelectorAll('tr'));
-
-      /** Generate a content matrix */
-      const content = rows.map((row) => {
-        /** Get cells from row */
-        const cells = Array.from(row.querySelectorAll('th, td'))
-
-        /** Return cells content */
-        return cells.map((cell) => cell.innerHTML);
-      });
-
-      /** Update Tool's data */
-      this.data = {
-        withHeadings: firstRowHeading !== null,
-        content
-      };
-
-      /** Update table block */
-      if (this.table.wrapper) {
-        this.table.wrapper.replaceWith(this.render());
       }
-    });
+    }, 100);
   }
 
   stringToHtml(str) {
