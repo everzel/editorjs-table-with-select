@@ -1,28 +1,29 @@
 # Table tool
 
-The Table Block for the [Editor.js](https://editorjs.io). Finally improved.
-
-![](https://capella.pics/41294cec-a2b3-4157-8399-ffefed3d8ffd.jpg)
+The Table Block for the [Editor.js](https://editorjs.io) with the possibility select rows.
 
 ## Installation
 
 Get the package
 
 ```shell
-npm i --save @editorjs/table
+yarn add https://github.com/everzel/table.git
 ```
-or
 
-```shell
-yarn add @editorjs/table
-```
+# Select
+
+Click the right mouse button to start the selection.
+
+### Press ``Shift+Delete`` to clear the selected items.
+
+### Press ``Delete`` to delete the selected items (If you didn't select all rows vertical or horizontal they will be clear).
 
 ## Usage
 
 Add a new Tool to the `tools` property of the Editor.js initial config.
 
 ```javascript
-import Table from '@editorjs/table';
+import Table from '@everzel/table/dist/table';
 
 var editor = EditorJS({
   tools: {
@@ -74,19 +75,3 @@ This Tool returns `data` in the following format
   }
 }
 ```
-
-# Support maintenance 🎖
-
-If you're using this tool and editor.js in your business, please consider supporting their maintenance and evolution.
-
-[http://opencollective.com/editorjs](http://opencollective.com/editorjs)
-
-# About CodeX
-
-<img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
-
-CodeX is a team of digital specialists around the world interested in building high-quality open source products on a global market. We are [open](https://codex.so/join) for young people who want to constantly improve their skills and grow professionally with experiments in leading technologies.
-
-| 🌐 | Join  👋  | Twitter | Instagram |
-| -- | -- | -- | -- |
-| [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team) |
