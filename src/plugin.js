@@ -63,6 +63,8 @@ export default class TableBlock {
       content: data && data.content ? data.content : []
     };
     this.table = null;
+    this.containerId = null;
+    this.selectorId = null;
   }
 
   /**
@@ -109,7 +111,139 @@ export default class TableBlock {
 
     this.table.setHeadingsSetting(this.data.withHeadings);
 
+    this.initSelectMaster();
+
     return this.container;
+  }
+
+  initSelectMaster() {
+    this.container.children[0].appendChild($.make('div', ['selection']));
+
+    const container = this.container.children[0];
+    const selection = this.container.querySelector('.selection');
+
+    let isMouseDown = false;
+    let selectedElements = [];
+    let startPoint = null;
+
+    container.addEventListener('mousedown', (e) => {
+      if (e.button !== 2) return;
+
+      isMouseDown = true;
+      startPoint = {
+        x: e.clientX,
+        y: e.clientY
+      };
+
+      selection.style.display = 'block';
+      selection.style.left = `${startPoint.x}px`;
+      selection.style.top = `${startPoint.y}px`;
+      selection.style.width = '0';
+      selection.style.height = '0';
+    });
+
+    container.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+
+      const x = e.clientX;
+      const y = e.clientY;
+
+      selection.style.width = `${Math.abs(x - startPoint.x)}px`;
+      selection.style.height = `${Math.abs(y - startPoint.y)}px`;
+      selection.style.left = `${Math.min(x, startPoint.x)}px`;
+      selection.style.top = `${Math.min(y, startPoint.y)}px`;
+
+      const items = this.container.querySelectorAll('.tc-cell');
+
+      items.forEach((item) => {
+        item.addEventListener('click', () => {
+          selectedElements.forEach(selectedItem => selectedItem.classList.remove('selected'));
+        });
+
+        const rect = item.getBoundingClientRect();
+        const selRect = selection.getBoundingClientRect();
+        if (
+            rect.right >= selRect.left && rect.left <= selRect.right &&
+            rect.bottom >= selRect.top && rect.top <= selRect.bottom
+        ) {
+          item.classList.add('selected');
+          if (!selectedElements.includes(item)) {
+            selectedElements.push(item);
+          }
+        } else {
+          item.classList.remove('selected');
+          selectedElements = selectedElements.filter(el => el !== item);
+        }
+      });
+    });
+
+    container.addEventListener('mouseup', (e) => {
+      isMouseDown = false;
+      startPoint = null;
+
+      selection.style.display = 'none';
+    });
+
+    container.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && e.shiftKey) {
+        selectedElements.forEach(item => {
+          item.classList.remove('selected');
+          item.textContent = '';
+        });
+
+        selectedElements = [];
+      } else if (e.key === 'Backspace') {
+        const itemParents = new Set();
+
+        selectedElements.forEach(item => {
+          itemParents.add(item.parentElement);
+        });
+
+        const allItemParents = Array.from(this.container.querySelectorAll('.tc-row'));
+        const sameOrderSelected = [];
+
+        itemParents.forEach(itemParent => {
+          const itemsInParent = Array.from(itemParent.querySelectorAll('.tc-cell'));
+          const selectedItemsInParent = itemsInParent.filter(item => selectedElements.includes(item));
+
+          if (selectedItemsInParent.length === itemsInParent.length) {
+            itemParent.remove();
+          } else {
+            selectedItemsInParent.forEach((item, i) => {
+              if (sameOrderSelected[i] === undefined) {
+                sameOrderSelected[i] = [];
+              }
+              sameOrderSelected[i].push(item);
+            });
+
+            selectedItemsInParent.forEach(item => {
+              item.classList.remove('selected');
+              item.textContent = '';
+            });
+          }
+        });
+
+        sameOrderSelected.forEach((items, index) => {
+          if (items.length === allItemParents.length) {
+            items.forEach(item => {
+              item.remove();
+            });
+          }
+        });
+
+        selectedElements = [];
+
+        let rows = Array.from(this.container.querySelectorAll('.tc-row'));
+
+        if (rows.length <= 0) {
+          this.table.resize();
+        }
+      }
+    });
   }
 
   /**
