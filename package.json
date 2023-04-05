@@ -9,7 +9,7 @@
     "build:dev": "webpack --mode development --watch",
     "lint": "eslint -c ./.eslintrc --ext .js --fix ."
   },
-  "repository": "https://github.com/editor-js/table",
+  "repository": "https://github.com/everzel/editorjs-table-with-select",
   "author": {
     "name": "CodeX Team",
     "email": "team@ifmo.su"
