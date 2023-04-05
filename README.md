@@ -7,7 +7,7 @@ The Table Block for the [Editor.js](https://editorjs.io) with the possibility se
 Get the package
 
 ```shell
-yarn add https://github.com/everzel/table.git
+yarn add https://github.com/everzel/editorjs-table-with-select.git
 ```
 
 # Select
