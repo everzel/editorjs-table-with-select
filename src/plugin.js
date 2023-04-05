@@ -131,13 +131,15 @@ export default class TableBlock {
 
       isMouseDown = true;
       startPoint = {
-        x: e.clientX,
-        y: e.clientY
+        x: e.clientX + window.scrollX,
+        y: e.clientY + window.scrollY
       };
 
+      const containerRect = container.getBoundingClientRect();
+
       selection.style.display = 'block';
-      selection.style.left = `${startPoint.x}px`;
-      selection.style.top = `${startPoint.y}px`;
+      selection.style.left = `${startPoint.x - containerRect.left - window.scrollX}px`;
+      selection.style.top = `${startPoint.y - containerRect.top - window.scrollY}px`;
       selection.style.width = '0';
       selection.style.height = '0';
     });
@@ -145,13 +147,15 @@ export default class TableBlock {
     container.addEventListener('mousemove', (e) => {
       if (!isMouseDown) return;
 
-      const x = e.clientX;
-      const y = e.clientY;
+      const x = e.clientX + window.scrollX;
+      const y = e.clientY + window.scrollY;
+
+      const containerRect = container.getBoundingClientRect();
 
       selection.style.width = `${Math.abs(x - startPoint.x)}px`;
       selection.style.height = `${Math.abs(y - startPoint.y)}px`;
-      selection.style.left = `${Math.min(x, startPoint.x)}px`;
-      selection.style.top = `${Math.min(y, startPoint.y)}px`;
+      selection.style.left = `${Math.min(x, startPoint.x) - containerRect.left - window.scrollX}px`;
+      selection.style.top = `${Math.min(y, startPoint.y) - containerRect.top - window.scrollY}px`;
 
       const items = this.container.querySelectorAll('.tc-cell');
 
