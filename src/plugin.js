@@ -402,7 +402,13 @@ export default class TableBlock {
           const cells = Array.from(row.querySelectorAll('th, td'))
 
           /** Return cells content */
-          return cells.map((cell) => cell.innerHTML);
+          return cells.map((cell) => {
+            return {
+              background: null,
+              color: null,
+              content: cell.innerHTML
+            };
+          });
         });
 
         /** Update Tool's data */
