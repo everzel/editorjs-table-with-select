@@ -609,6 +609,10 @@ export default class Table {
   fillRow(row, numberOfColumns) {
     let firstRowCells = this.table.querySelector(`.${CSS.row}:first-child`);
 
+    if (this.tunes.withHeadings) {
+      firstRowCells = this.table.querySelector(`.${CSS.row}:nth-child(2)`);
+    }
+
     for (let i = 1; i <= numberOfColumns; i++) {
       const newCell = this.createCell();
 
@@ -823,7 +827,21 @@ export default class Table {
     if (withHeadings) {
       this.table.classList.add(CSS.withHeadings);
       this.addHeadingAttrToFirstRow();
+
+      let firstRow = this.table.querySelector(`.${CSS.row}:first-child`);
+
+      for (let i = 0; i < firstRow.childElementCount; i++) {
+        firstRow.children[i].style = '';
+      }
     } else {
+      let firstRow = this.table.querySelector(`.${CSS.row}:first-child`);
+      let lastRow = this.table.querySelector(`.${CSS.row}:last-child`);
+
+      for (let i = 0; i < firstRow.childElementCount; i++) {
+        firstRow.children[i].style.background = lastRow.children[i].style.background;
+        firstRow.children[i].style.color = lastRow.children[i].style.color;
+      }
+
       this.table.classList.remove(CSS.withHeadings);
       this.removeHeadingAttrFromFirstRow();
     }
@@ -903,8 +921,10 @@ export default class Table {
     this.selectedColumn = index;
   }
 
-  setBackground(index, hexBackground, hexColor) {
+  setBackground(index, hexBackground, hexColor, isAppendRow) {
     for (let i = 1; i <= this.numberOfRows; i++) {
+      if (!isAppendRow && this.tunes.withHeadings && i === 1) continue;
+
       const cell = this.getCell(i, index);
 
       if (cell) {
