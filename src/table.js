@@ -597,6 +597,7 @@ export default class Table {
         for (let j = 0; j < data.content[i].length; j++) {
           let content = data.content[i][j];
 
+          console.log(typeof data.content[i][j], data.content[i][j])
           if (typeof data.content[i][j] === 'string') {
             content = {
               background: null,
