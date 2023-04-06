@@ -1,6 +1,6 @@
-# Table tool
+# Table tool (Select, Fill)
 
-The Table Block for the [Editor.js](https://editorjs.io) with the possibility select rows.
+The Table Block for the [Editor.js](https://editorjs.io) with the possibility select and fill rows.
 
 ## Installation
 
@@ -41,8 +41,19 @@ var editor = EditorJS({
       class: Table,
       inlineToolbar: true,
       config: {
-        rows: 2,
-        cols: 3,
+          rows: 2,
+          cols: 3,
+          isAllowColors: true, // Set to false if you want to disable the selected colors
+          colors: [ // Or will view by default: green, white, gray, red, blue
+              {
+                  name: 'Blue',
+                  icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+                      '<rect width="16" height="16" rx="3" fill="#2CA1DC"/>\n' +
+                      '</svg>\n',
+                  hexBackground: '#2ca1dc',
+                  hexColor: '#ffffff'
+              }
+          ]  
       },
     },
   },

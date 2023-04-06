@@ -5,6 +5,11 @@ import newToRightIcon from './img/new-to-right.svg';
 import newToUpIcon from './img/new-to-up.svg';
 import newToDownIcon from './img/new-to-down.svg';
 import closeIcon from './img/cross.svg';
+import whiteIcon from './img/white-icon.svg';
+import greenIcon from './img/green-icon.svg';
+import blueIcon from './img/blue-icon.svg';
+import grayIcon from './img/gray-icon.svg';
+import redIcon from './img/red-icon.svg';
 import * as $ from './utils/dom';
 import throttled from './utils/throttled';
 
@@ -160,10 +165,70 @@ export default class Table {
    * @returns {Toolbox}
    */
   createColumnToolbox() {
+    let appendColors = [];
+
+    if (this.config.hasOwnProperty('isAllowColors') && this.config.isAllowColors) {
+      if (this.config.hasOwnProperty('colors')) {
+        appendColors = this.config.colors.map((item) => {
+          return {
+            label: this.api.i18n.t('Set ' + item.name + ' Background'),
+            icon: item.icon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, item.hexBackground, item.hexColor)
+              this.hideToolboxes();
+            }
+          };
+        });
+      } else {
+        appendColors = [
+          {
+            label: this.api.i18n.t('Set White Background'),
+            icon: whiteIcon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, '#ffffff', '#000000')
+              this.hideToolboxes();
+            }
+          },
+          {
+            label: this.api.i18n.t('Set Green Background'),
+            icon: greenIcon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, '#1DCB6C', '#ffffff')
+              this.hideToolboxes();
+            }
+          },
+          {
+            label: this.api.i18n.t('Set Blue Background'),
+            icon: blueIcon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, '#2ca1dc', '#ffffff')
+              this.hideToolboxes();
+            }
+          },
+          {
+            label: this.api.i18n.t('Set Gray Background'),
+            icon: grayIcon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, '#d6d6d6', '#666666')
+              this.hideToolboxes();
+            }
+          },
+          {
+            label: this.api.i18n.t('Set Red Background'),
+            icon: redIcon,
+            onClick: () => {
+              this.setBackground(this.selectedColumn, '#E94A37', '#ffffff')
+              this.hideToolboxes();
+            }
+          }
+        ];
+      }
+    }
+
     return new Toolbox({
       api: this.api,
       cssModifier: 'column',
-      items: [
+      items: [...appendColors, ...[
         {
           label: this.api.i18n.t('Add column to left'),
           icon: newToLeftIcon,
@@ -192,7 +257,7 @@ export default class Table {
             this.hideToolboxes();
           }
         }
-      ],
+      ]],
       onOpen: () => {
         this.selectColumn(this.hoveredColumn);
         this.hideRowToolbox();
@@ -537,8 +602,15 @@ export default class Table {
    * @param {number} numberOfColumns - how many cells should be in a row
    */
   fillRow(row, numberOfColumns) {
+    let firstRowCells = this.table.querySelector(`.${CSS.row}:first-child`);
+
     for (let i = 1; i <= numberOfColumns; i++) {
       const newCell = this.createCell();
+
+      if (firstRowCells && firstRowCells.children[i - 1].style.background) {
+        newCell.style.background = firstRowCells.children[i - 1].style.background;
+        newCell.style.color = firstRowCells.children[i - 1].style.color;
+      }
 
       row.appendChild(newCell);
     }
@@ -826,6 +898,19 @@ export default class Table {
     this.selectedColumn = index;
   }
 
+  setBackground(index, hexBackground, hexColor) {
+    for (let i = 1; i <= this.numberOfRows; i++) {
+      const cell = this.getCell(i, index);
+
+      if (cell) {
+        cell.style.background = hexBackground;
+        cell.style.color = hexColor;
+      }
+    }
+
+    this.selectedColumn = index;
+  }
+
   /**
    * Remove effect of a selected column
    */
@@ -935,12 +1020,28 @@ export default class Table {
         continue;
       }
 
-      data.push(cells.map(cell => cell.innerHTML));
+      data.push(cells.map(cell => {
+        return {
+          background: cell.style.background ? this.rgbToHex(cell.style.background) : null,
+          color: cell.style.color ? this.rgbToHex(cell.style.color) : null,
+          content: cell.innerHTML,
+        };
+      }));
     }
 
     return data;
   }
 
+  rgbToHex(rgbString) {
+    const rgb = rgbString.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (!rgb) return null;
+
+    const r = parseInt(rgb[1], 10);
+    const g = parseInt(rgb[2], 10);
+    const b = parseInt(rgb[3], 10);
+
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+  }
   /**
    * Remove listeners on the document
    */

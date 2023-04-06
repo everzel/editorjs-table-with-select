@@ -15,6 +15,8 @@ import * as $ from './utils/dom';
  * @property {HTMLElement} icon - icon for the tune
  * @property {boolean} isActive - default state of the tune
  * @property {void} setTune - set tune state to the table data
+ * @property {boolean} isAllowColors
+ * @property {object} colors
  */
 /**
  * @typedef {object} TableData - object with the data transferred to form a table
