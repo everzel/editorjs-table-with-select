@@ -282,7 +282,7 @@ export default class Table {
           label: this.api.i18n.t('Add row above'),
           icon: newToUpIcon,
           onClick: () => {
-            this.addRow(this.selectedRow, true);
+            this.addRow(this.selectedRow, true, false);
             this.hideToolboxes();
           }
         },
@@ -437,9 +437,10 @@ export default class Table {
    *
    * @param {number} index - number in the array of rows, where new column to insert, -1 if insert at the end
    * @param {boolean} [setFocus] - pass true to focus the inserted row
+   * @param {boolean} isBellow
    * @returns {HTMLElement} row
    */
-  addRow(index = -1, setFocus = false) {
+  addRow(index = -1, setFocus = false, isBellow = true) {
     let insertedRow;
     let rowElem = $.make('div', CSS.row);
 
@@ -607,18 +608,20 @@ export default class Table {
    * @param {number} numberOfColumns - how many cells should be in a row
    */
   fillRow(row, numberOfColumns) {
-    let firstRowCells = this.table.querySelector(`.${CSS.row}:first-child`);
+    let firstRowCells = this.table.querySelector(`.${CSS.row}:nth-last-child(1)`);
 
-    if (this.tunes.withHeadings) {
-      firstRowCells = this.table.querySelector(`.${CSS.row}:nth-child(2)`);
+    if (firstRowCells.children.length === 0) {
+      firstRowCells = this.table.querySelector(`.${CSS.row}:nth-last-child(2)`);
     }
 
     for (let i = 1; i <= numberOfColumns; i++) {
       const newCell = this.createCell();
 
-      if (firstRowCells && firstRowCells.children[i - 1].style.background) {
-        newCell.style.background = firstRowCells.children[i - 1].style.background;
-        newCell.style.color = firstRowCells.children[i - 1].style.color;
+      let childId = i - 1;
+
+      if (firstRowCells && firstRowCells.children[childId] && firstRowCells.children[childId].style.background) {
+        newCell.style.background = firstRowCells.children[childId].style.background;
+        newCell.style.color = firstRowCells.children[childId].style.color;
       }
 
       row.appendChild(newCell);
@@ -802,7 +805,7 @@ export default class Table {
     }
 
     if (!this.isRowMenuShowing) {
-      if (row > 0 && row <= this.numberOfRows) { // not sure this statement is needed. Maybe it should be fixed in getHoveredCell()
+      if (row > 0 && row <= this.numberOfRows && ! (row === 1 && this.tunes.withHeadings)) { // not sure this statement is needed. Maybe it should be fixed in getHoveredCell()
         this.toolboxRow.show(() => {
           const hoveredRowElement = this.getRow(row);
           const { fromTopBorder } = $.getRelativeCoordsOfTwoElems(this.table, hoveredRowElement);
@@ -827,6 +830,7 @@ export default class Table {
     if (withHeadings) {
       this.table.classList.add(CSS.withHeadings);
       this.addHeadingAttrToFirstRow();
+      this.resetHeadingStyles();
 
       let firstRow = this.table.querySelector(`.${CSS.row}:first-child`);
 
@@ -856,6 +860,18 @@ export default class Table {
 
       if (cell) {
         cell.setAttribute('heading', this.api.i18n.t('Heading'));
+      }
+    }
+
+    this.resetHeadingStyles();
+  }
+
+  resetHeadingStyles() {
+    for (let cellIndex = 1; cellIndex <= this.numberOfColumns; cellIndex++) {
+      let cell = this.getCell(1, cellIndex);
+
+      if (cell) {
+        cell.style = '';
       }
     }
   }
