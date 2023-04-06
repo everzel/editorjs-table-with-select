@@ -595,7 +595,17 @@ export default class Table {
     if (data && data.content) {
       for (let i = 0; i < data.content.length; i++) {
         for (let j = 0; j < data.content[i].length; j++) {
-          this.setCellContent(i + 1, j + 1, data.content[i][j]);
+          let content = data.content[i][j];
+
+          if (data.content[i][j] instanceof 'string') {
+            content = {
+              background: null,
+              color: null,
+              content: content
+            };
+          }
+
+          this.setCellContent(i + 1, j + 1, content);
         }
       }
     }
@@ -1062,6 +1072,14 @@ export default class Table {
       }
 
       data.push(cells.map(cell => {
+        if (cell instanceof 'string') {
+          return {
+            background: null,
+            color: null,
+            content: cell,
+          };
+        }
+
         return {
           background: cell.style.background ? this.rgbToHex(cell.style.background) : null,
           color: cell.style.color ? this.rgbToHex(cell.style.color) : null,
