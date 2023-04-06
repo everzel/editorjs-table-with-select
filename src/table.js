@@ -379,12 +379,17 @@ export default class Table {
    *
    * @param {number} row - cell row coordinate
    * @param {number} column - cell column coordinate
-   * @param {string} content - cell HTML content
+   * @param {object} data - cell HTML content
    */
-  setCellContent(row, column, content) {
+  setCellContent(row, column, data) {
     const cell = this.getCell(row, column);
 
-    cell.innerHTML = content;
+    cell.innerHTML = data.content;
+
+    if (data.background && data.color) {
+      cell.style.background = data.background;
+      cell.style.color = data.color;
+    }
   }
 
   /**
