@@ -1072,7 +1072,7 @@ export default class Table {
       }
 
       data.push(cells.map(cell => {
-        if (cell instanceof 'string') {
+        if (typeof cell === 'string') {
           return {
             background: null,
             color: null,
