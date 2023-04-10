@@ -40,93 +40,97 @@ export default class Table {
    * @param {TableConfig} config - Editor.js API
    */
   constructor(readOnly, api, data, config) {
-    this.readOnly = readOnly;
-    this.api = api;
-    this.data = data;
-    this.config = config;
-
-    /**
-     * DOM nodes
-     */
-    this.wrapper = null;
-    this.table = null;
-
-    /**
-     * Toolbox for managing of columns
-     */
-    this.toolboxColumn = this.createColumnToolbox();
-    this.toolboxRow = this.createRowToolbox();
-
-    /**
-     * Create table and wrapper elements
-     */
-    this.createTableWrapper();
-
-    // Current hovered row index
-    this.hoveredRow = 0;
-
-    // Current hovered column index
-    this.hoveredColumn = 0;
-
-    // Index of last selected row via toolbox
-    this.selectedRow = 0;
-
-    // Index of last selected column via toolbox
-    this.selectedColumn = 0;
-
-    // Additional settings for the table
-    this.tunes = {
-      withHeadings: false
-    };
-
-    /**
-     * Resize table to match config/data size
-     */
-    this.resize();
-
-    /**
-     * Fill the table with data
-     */
-    this.fill();
-
-    /**
-     * The cell in which the focus is currently located, if 0 and 0 then there is no focus
-     * Uses to switch between cells with buttons
-     */
-    this.focusedCell = {
-      row: 0,
-      column: 0
-    };
-
-    /**
-     * Global click listener allows to delegate clicks on some elements
-     */
-    this.documentClicked = (event) => {
-      const clickedInsideTable = event.target.closest(`.${CSS.table}`) !== null;
-      const outsideTableClicked = event.target.closest(`.${CSS.wrapper}`) === null;
-      const clickedOutsideToolboxes = clickedInsideTable || outsideTableClicked;
-
-      if (clickedOutsideToolboxes) {
-        this.hideToolboxes();
-      }
-
-      const clickedOnAddRowButton = event.target.closest(`.${CSS.addRow}`);
-      const clickedOnAddColumnButton = event.target.closest(`.${CSS.addColumn}`);
+    try {
+      this.readOnly = readOnly;
+      this.api = api;
+      this.data = data;
+      this.config = config;
 
       /**
-       * Also, check if clicked in current table, not other (because documentClicked bound to the whole document)
+       * DOM nodes
        */
-      if (clickedOnAddRowButton && clickedOnAddRowButton.parentNode === this.wrapper) {
-        this.addRow(undefined, true);
-        this.hideToolboxes();
-      } else if (clickedOnAddColumnButton && clickedOnAddColumnButton.parentNode === this.wrapper) {
-        this.addColumn(undefined, true);
-        this.hideToolboxes();
-      }
-    };
+      this.wrapper = null;
+      this.table = null;
 
-    if (!this.readOnly) {
-      this.bindEvents();
+      /**
+       * Toolbox for managing of columns
+       */
+      this.toolboxColumn = this.createColumnToolbox();
+      this.toolboxRow = this.createRowToolbox();
+
+      /**
+       * Create table and wrapper elements
+       */
+      this.createTableWrapper();
+
+      // Current hovered row index
+      this.hoveredRow = 0;
+
+      // Current hovered column index
+      this.hoveredColumn = 0;
+
+      // Index of last selected row via toolbox
+      this.selectedRow = 0;
+
+      // Index of last selected column via toolbox
+      this.selectedColumn = 0;
+
+      // Additional settings for the table
+      this.tunes = {
+        withHeadings: false
+      };
+
+      /**
+       * Resize table to match config/data size
+       */
+      this.resize();
+
+      /**
+       * Fill the table with data
+       */
+      this.fill();
+
+      /**
+       * The cell in which the focus is currently located, if 0 and 0 then there is no focus
+       * Uses to switch between cells with buttons
+       */
+      this.focusedCell = {
+        row: 0,
+        column: 0
+      };
+
+      /**
+       * Global click listener allows to delegate clicks on some elements
+       */
+      this.documentClicked = (event) => {
+        const clickedInsideTable = event.target.closest(`.${CSS.table}`) !== null;
+        const outsideTableClicked = event.target.closest(`.${CSS.wrapper}`) === null;
+        const clickedOutsideToolboxes = clickedInsideTable || outsideTableClicked;
+
+        if (clickedOutsideToolboxes) {
+          this.hideToolboxes();
+        }
+
+        const clickedOnAddRowButton = event.target.closest(`.${CSS.addRow}`);
+        const clickedOnAddColumnButton = event.target.closest(`.${CSS.addColumn}`);
+
+        /**
+         * Also, check if clicked in current table, not other (because documentClicked bound to the whole document)
+         */
+        if (clickedOnAddRowButton && clickedOnAddRowButton.parentNode === this.wrapper) {
+          this.addRow(undefined, true);
+          this.hideToolboxes();
+        } else if (clickedOnAddColumnButton && clickedOnAddColumnButton.parentNode === this.wrapper) {
+          this.addColumn(undefined, true);
+          this.hideToolboxes();
+        }
+      };
+
+      if (!this.readOnly) {
+        this.bindEvents();
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -384,7 +388,7 @@ export default class Table {
   setCellContent(row, column, data) {
     const cell = this.getCell(row, column);
 
-    cell.innerHTML = data.content;
+    cell.innerHTML = data.content || data;
 
     if (data.background && data.color) {
       cell.style.background = data.background;
@@ -597,11 +601,11 @@ export default class Table {
         for (let j = 0; j < data.content[i].length; j++) {
           let content = data.content[i][j];
 
-          if (typeof data.content[i][j] === 'string') {
+          if (typeof data.content[i][j] === 'string' || data.content[i][j] === null) {
             content = {
               background: null,
               color: null,
-              content: content
+              content: data.content[i][j]
             };
           }
 
@@ -1072,7 +1076,7 @@ export default class Table {
       }
 
       data.push(cells.map(cell => {
-        if (typeof cell === 'string') {
+        if (typeof cell === 'string' || cell === null) {
           return {
             background: null,
             color: null,
